@@ -68,13 +68,13 @@ def stop_process(process):
 def main():
 
     if len(sys.argv) != 2:
-        print("Uso: python3 hextopsy.py <archivo>")
+        print("Usage: python3 hextopsy.py <file>")
         sys.exit(1)
 
     sample = Path(sys.argv[1])
 
     if not sample.is_file():
-        print(f"[!] Archivo no encontrado: {sample}")
+        print(f"[!] File not found: {sample}")
         sys.exit(1)
 
     def show_banner():
@@ -86,13 +86,13 @@ def main():
         print("          Static Malware Analysis Toolkit")
         print("\n" + "=" * 58 + "\n")
     show_banner()
-    print(f"\n[*] Analizando: {sample.name}\n")
+    print(f"\n[*] Analyzing: {sample.name}\n")
 
-    print("[*] Selecciona el directorio donde guardar los informes.")
-    print("[*] Ejemplo: /home/remnux/Documents/Analysis")
-    print("[*] Pulsa ENTER para utilizar el directorio actual.\n")
+    print("[*] Select the directory where you want to save the reports.")
+    print("[*] Example: /home/remnux/Documents/Analysis")
+    print("[*] Press ENTER to use the current directory.\n")
 
-    destination = input("Directorio de salida: ").strip()
+    destination = input("Output directory: ").strip()
 
     if destination:
         output_dir = Path(destination).expanduser()
@@ -106,10 +106,10 @@ def main():
             raise NotADirectoryError(output_dir)
 
     except OSError as error:
-        print(f"[!] No se puede utilizar el directorio: {error}")
+        print(f"[!] Unable to use directory: {error}")
         sys.exit(1)
 
-    print(f"\n[+] Informes guardados en: {output_dir.resolve()}\n")
+    print(f"\n[+] Reports saved to: {output_dir.resolve()}\n")
 
     available = []
     unavailable = []
@@ -123,7 +123,7 @@ def main():
             unavailable.append(tool)
 
     if not available:
-        print("[!] No hay ninguna herramienta disponible.")
+        print("[!] No analysis tools are available.")
         sys.exit(1)
 
     for tool in available:
@@ -133,7 +133,7 @@ def main():
         timeout = LIMITS[tool]["timeout"]
         max_output = LIMITS[tool]["max_output_mb"] * 1024 * 1024
 
-        print(f"[*] Ejecutando {tool}...")
+        print(f"[*] Running {tool}...")
 
         status = "COMPLETED"
         exit_code = None
@@ -215,24 +215,24 @@ def main():
             results[tool] = status
 
             if status == "COMPLETED":
-                print(f"[+] Informe generado: {output_file}")
+                print(f"[+] Report generated: {output_file}")
 
             elif status == "ERROR":
-                print(f"[!] {tool} terminó con errores. Exit code: {exit_code}")
-                print(f"[+] Informe generado: {output_file}")
+                print(f"[!] {tool} finished with errors. Exit code: {exit_code}")
+                print(f"[+] Report generated: {output_file}")
 
             else:
-                print(f"[!] {tool} interrumpida: {status}")
-                print(f"[+] Resultados parciales guardados: {output_file}")
+                print(f"[!] {tool} interrupted: {status}")
+                print(f"[+] Partial results saved: {output_file}")
 
         except OSError as error:
 
             results[tool] = "ERROR"
-            print(f"[!] Error ejecutando {tool}: {error}")
+            print(f"[!] Error executing {tool}: {error}")
 
     if unavailable:
 
-        print("\n[!] Herramientas no disponibles:")
+        print("\n[!] Unavailable tools:")
 
         for tool in unavailable:
             print(f" - {tool}")
@@ -247,9 +247,9 @@ def main():
         elif tool in unavailable:
             print(f"[NOT FOUND] {tool}")
 
-    print(f"\n[*] Informes disponibles en: {output_dir.resolve()}")
+    print(f"\n[*] Reports available at: {output_dir.resolve()}")
     print("\n=======================================\n")
-    print("[*] Proceso finalizado.")
+    print("[*] Process completed.")
 
 
 if __name__ == "__main__":
