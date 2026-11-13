@@ -5,11 +5,11 @@
 ### Static Malware Analysis Toolkit
 
 **Developed by 5kidRo0t**  
-**Version: 0.1**
+**Version: 0.2**
 
 ![Python](https://img.shields.io/badge/Python-3.x-blue?logo=python)
 ![Platform](https://img.shields.io/badge/Platform-Linux-green?logo=linux)
-![Version](https://img.shields.io/badge/Version-0.1-orange)
+![Version](https://img.shields.io/badge/Version-0.2-orange)
 ![Purpose](https://img.shields.io/badge/Purpose-Malware%20Analysis-red)
 
 ---
@@ -20,15 +20,17 @@ Hextopsy is a Python-based tool designed to automate the initial static informat
 
 Instead of manually executing several commands one by one, Hextopsy brings multiple analysis utilities together and collects their output into individual text reports.
 
+Starting with version 0.2, Hextopsy also includes an integrated YARA rule generator that automatically creates and validates rules for identifying individual malware samples.
+
 The objective is simple: **save time, organize information and make the initial malware triage process easier.**
 
 Hextopsy does not attempt to replace the tools it uses. Instead, it acts as a lightweight wrapper that coordinates their execution and organizes their results.
 
-## ⚙️ Version 0.1 — Features
+## ⚙️ Version 0.2 — Features
 
-The first release of Hextopsy focuses on automated information extraction.
+Version 0.2 introduces an integrated YARA rule generation module while maintaining the automated information extraction functionality from the previous release.
 
-Currently, it supports the following tools:
+Currently, Hextopsy supports the following tools:
 
 | Tool | Purpose |
 |---|---|
@@ -38,10 +40,11 @@ Currently, it supports the following tools:
 | ExifTool | Extracts metadata and file information. |
 | FLOSS | Identifies and extracts obfuscated strings. |
 | Strings | Extracts readable strings from binary files. |
+| YARA Generator | Automatically generates and validates YARA rules for individual malware samples. |
 
 ### 📄 Automatic report generation
 
-Each utility generates its own `.txt` report:
+Each analysis utility generates its own `.txt` report:
 
 ```text
 binwalk.txt
@@ -55,6 +58,22 @@ strings.txt
 The user can specify the directory where the reports will be stored.
 
 If no directory is provided, Hextopsy automatically uses the current working directory.
+
+### 🧬 Automatic YARA rule generation
+
+Hextopsy includes an integrated module responsible for generating YARA rules automatically.
+
+After the static information extraction process, the module:
+
+- Calculates the sample's MD5, SHA256 and SHA512 hashes.
+- Retrieves the sample's file size.
+- Allows the user to assign a custom name to the sample.
+- Uses the original filename if no custom name is provided.
+- Generates a YARA rule designed to identify the exact sample.
+- Stores the generated rule in the selected output directory.
+- Automatically validates the generated rule against the original sample using YARA.
+
+The generated rule uses the file size and SHA256 hash to identify the exact sample.
 
 ### ⏱️ Execution safeguards
 
@@ -78,7 +97,7 @@ Possible execution statuses:
 
 Hextopsy requires Python 3 and the external analysis utilities listed below.
 
-To use the complete functionality, make sure all six tools are installed and accessible through your system's PATH.
+To use the complete functionality, make sure all six analysis tools are installed and accessible through your system's PATH.
 
 ### Required tools
 
@@ -89,6 +108,7 @@ To use the complete functionality, make sure all six tools are installed and acc
 - ExifTool
 - FLOSS
 - GNU Strings
+- YARA
 
 **Important:** PECheck requires its corresponding database file. The current version uses the following REMnux-specific path:
 
@@ -98,13 +118,15 @@ To use the complete functionality, make sure all six tools are installed and acc
 
 If your installation uses a different location, you may need to adjust the path in `hextopsy.py`.
 
+YARA is required to validate the generated rules. If the YARA executable is unavailable, rule validation cannot be performed.
+
 ### Recommended environment
 
 Hextopsy is currently intended for Linux environments, particularly malware-analysis distributions such as REMnux.
 
 Some of the required utilities may already be included in your distribution.
 
-If a utility is missing, Hextopsy will report it as `NOT FOUND` and continue with the remaining available tools.
+If an analysis utility is missing, Hextopsy will report it as `NOT FOUND` and continue with the remaining available tools.
 
 ## 🚀 Usage
 
@@ -142,6 +164,8 @@ Output directory:
 
 Simply press ENTER to save the reports in the current working directory.
 
+After the analysis reports have been generated, Hextopsy will start the YARA rule generation process and ask whether you want to assign a custom name to the sample.
+
 ## 📂 Example output
 
 After processing a sample, the destination directory will contain:
@@ -154,10 +178,13 @@ Analysis/
 ├── peframe.txt
 ├── exif.txt
 ├── floss.txt
-└── strings.txt
+├── strings.txt
+└── malware.yar
 ```
 
 Each report contains the output generated by its corresponding utility, along with execution status information.
+
+The `.yar` file contains the automatically generated YARA rule for identifying the analyzed sample.
 
 ## 🛡️ Security considerations
 
