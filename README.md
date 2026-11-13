@@ -1,6 +1,5 @@
-# 🦠 Hextopsy
+<img width="1336" height="824" alt="file_00000000b11081f4968144033d7af98a" src="https://github.com/user-attachments/assets/6c20118d-e2f0-49a3-bdd3-b2d5f1d322f9" />
 
-<img width="784" height="795" alt="IMG_20261112_164447" src="https://github.com/user-attachments/assets/b662e3f9-feed-4f4f-a522-d1ed659a134c" />
 
 ### Static Malware Analysis Toolkit
 
