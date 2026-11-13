@@ -79,7 +79,39 @@ def stop_process(process):
 
     except ProcessLookupError:
         pass
+    
+def generate_yara(sample, output_dir):
 
+    yaragen = Path(__file__).resolve().parent / "modules" / "yaragen.py"
+
+    if not yaragen.is_file():
+        print("[!] YARA generator module not found.")
+        return
+
+    output_file = output_dir / f"{sample.stem}.yar"
+
+    print("\n[*] Starting YARA rule generation...\n")
+
+    try:
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(yaragen),
+                str(sample.resolve()),
+                "-o",
+                str(output_file)
+            ],
+            check=False
+        )
+
+        if result.returncode == 0:
+            print("\n[+] YARA rule successfully generated.")
+
+        else:
+            print("\n[!] YARA rule generation failed.")
+
+    except OSError as error:
+        print(f"[!] Unable to execute YARA generator: {error}")
 
 def main():
 
@@ -252,7 +284,8 @@ def main():
 
         for tool in unavailable:
             print(f" - {tool}")
-
+            
+    generate_yara(sample, output_dir)
     print("\n========== HEXTOPSY SUMMARY ==========\n")
 
     for tool in TOOLS:
