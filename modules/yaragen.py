@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 
 import argparse
@@ -57,14 +58,25 @@ def yara_identifier(name):
     if not identifier:
         identifier = "sample"
 
-    if identifier[0].isdigit():
+    elif identifier[0].isdigit():
         identifier = f"sample_{identifier}"
 
     return identifier
 
 
 def yara_string(value):
-    return value.replace("\\", "\\\\").replace('"', '\\"')
+    replacements = {
+        "\\": "\\\\",
+        '"': '\\"',
+        "\n": "\\n",
+        "\r": "\\r",
+        "\t": "\\t"
+    }
+
+    return "".join(
+        replacements.get(char, char)
+        for char in value
+    )
 
 
 def build_rule(file_path, hashes, author, malware_name):
@@ -100,13 +112,23 @@ def validate_with_yara(rule_path, sample_path, expected_rule):
 
     if yara is None:
         print("[!] YARA executable not found. Validation skipped.")
+        return None
+
+    try:
+        result = subprocess.run(
+            [yara, str(rule_path), str(sample_path)],
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+
+    except subprocess.TimeoutExpired:
+        print("[!] YARA validation timed out.")
         return False
 
-    result = subprocess.run(
-        [yara, str(rule_path), str(sample_path)],
-        capture_output=True,
-        text=True
-    )
+    except OSError as error:
+        print(f"[!] Error executing YARA: {error}")
+        return False
 
     if result.returncode != 0:
         print("[!] YARA validation failed:")
@@ -169,6 +191,10 @@ def main():
             else sample_path.with_suffix(".yar")
         )
 
+        if output_path.resolve() == sample_path.resolve():
+            print("[!] Error: output cannot overwrite the sample.")
+            return 1
+
         rule = build_rule(
             sample_path,
             hashes,
@@ -191,11 +217,13 @@ def main():
 
     rule_name = f"{yara_identifier(malware_name)}_malware"
 
-    if not validate_with_yara(
+    validation = validate_with_yara(
         output_path,
         sample_path,
         rule_name
-    ):
+    )
+
+    if validation is False:
         return 2
 
     return 0
