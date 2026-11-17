@@ -11,6 +11,7 @@ from pathlib import Path
 
 
 CHUNK_SIZE = 1024 * 1024
+MAX_FILE_SIZE = 100 * 1024 * 1024
 
 
 def calculate_hashes(file_path):
@@ -181,6 +182,10 @@ def main():
         return 1
 
     try:
+        if sample_path.stat().st_size > MAX_FILE_SIZE:
+            print("[!] Error: sample exceeds maximum allowed size (100 MiB).")
+            return 1
+
         malware_name = ask_sample_name(sample_path.name)
 
         hashes = calculate_hashes(sample_path)
